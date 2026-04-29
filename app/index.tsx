@@ -1,25 +1,33 @@
-import { StyleSheet, Text, View, ActivityIndicator } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import OnBoard from '@/components/OnBoard/onBoard'
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import { Redirect } from 'expo-router'
+import { ActivityIndicator, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Redirect } from 'expo-router';
+
+import OnBoard from '@/components/OnBoard/onBoard';
+import { useAuth } from '@/context/auth';
 
 export default function OnboardScreen() {
-  const [isFirstLaunch, setIsFirstLaunch] = useState<boolean | null>(null);
+  const { session, loading } = useAuth();
+  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<boolean | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+
     AsyncStorage.getItem('hasCompletedOnboarding').then((value: string | null) => {
-      if (value === 'true') {
-        setIsFirstLaunch(false);
-      } else {
-        setIsFirstLaunch(true);
-      }
+      if (!isMounted) return;
+      setHasCompletedOnboarding(value === 'true');
     }).catch(() => {
-      setIsFirstLaunch(true);
+      if (isMounted) {
+        setHasCompletedOnboarding(false);
+      }
     });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  if (isFirstLaunch === null) {
+  if (hasCompletedOnboarding === null || loading) {
     return (
       <View className="flex-1 justify-center items-center">
         <ActivityIndicator size="large" color="#c300ff" />
@@ -27,11 +35,13 @@ export default function OnboardScreen() {
     );
   }
 
-  if (!isFirstLaunch) {
-    return <Redirect href="/(auth)/AuthScreen" />;
+  if (!hasCompletedOnboarding) {
+    return <OnBoard />;
   }
 
-  return (
-    <OnBoard/>
-  )
+  if (session) {
+    return <Redirect href="/(tabs)/home" />;
+  }
+
+  return <Redirect href="/(auth)/AuthScreen" />;
 }

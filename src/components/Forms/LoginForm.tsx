@@ -1,9 +1,10 @@
 import PrimaryButton from '@/components/Buttons/PrimaryButton';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '@/context/auth';
+import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Text, View } from 'react-native';
+
 import { LoginFormValues, loginSchema } from '../../domain/validations/auth.schema';
 import ControlledInput from './ControlledInput';
 
@@ -22,40 +23,54 @@ const LoginForm = () => {
     try {
       setIsSubmitting(true);
       await signIn({ email: data.email, password: data.password });
-    } catch (e) {
-      // Error is already alerted by the context
+    } catch {
+      // Error is already alerted by the context.
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <View className="px-4 gap-4 mt-4">
+    <View className="gap-5">
       <ControlledInput
+        autoCapitalize="none"
+        autoComplete="email"
+        autoCorrect={false}
         control={control}
-        name="email"
+        icon="mail-outline"
+        keyboardType="email-address"
         label="Email"
-        placeholder="Enter your email"
+        name="email"
+        placeholder="name@example.com"
+        textContentType="emailAddress"
       />
 
       <ControlledInput
+        autoCapitalize="none"
+        autoCorrect={false}
         control={control}
-        name="password"
+        icon="lock-closed-outline"
         label="Password"
+        name="password"
         placeholder="Enter your password"
-        secureTextEntry={true}
+        secureTextEntry
+        textContentType="password"
       />
 
-      <Text className='text-right text-primary font-semibold'>Forgot Password?</Text>
+      <View className="rounded-[20px] border border-[#EBDFFD] bg-[#F7F1FF] px-4 py-3">
+        <Text className="text-[13px] leading-5 text-[#675E82]">
+          Use the email linked to your Nestly account to continue where you left off.
+        </Text>
+      </View>
 
       <PrimaryButton
-        title='Login'
-        className="w-full mt-6"
-        onPress={handleSubmit(onSubmit)}
+        className="mt-1"
         isLoading={isSubmitting}
+        onPress={handleSubmit(onSubmit)}
+        title="Sign In"
       />
     </View>
-  )
-}
+  );
+};
 
 export default LoginForm;

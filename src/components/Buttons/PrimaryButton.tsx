@@ -1,31 +1,40 @@
-import {Text, TouchableOpacity, ActivityIndicator} from 'react-native'
-import React from 'react'
+import React from 'react';
+import { ActivityIndicator, Text, TouchableOpacity } from 'react-native';
 
-type PrimaryButtonProps={
-  title:string,
-  onPress:()=>void;
-  className?:string,
-  isLoading?:boolean,
-}
+type PrimaryButtonProps = {
+  title: string;
+  onPress: () => void;
+  className?: string;
+  isLoading?: boolean;
+};
 
-const PrimaryButton = ({title,onPress,className='',isLoading=false}:PrimaryButtonProps) => {
-
+const PrimaryButton = ({
+  title,
+  onPress,
+  className = '',
+  isLoading = false,
+}: PrimaryButtonProps) => {
   return (
-       <TouchableOpacity
-      onPress={onPress}
-      activeOpacity={0.8}
+    <TouchableOpacity
+      activeOpacity={0.88}
+      className={`w-full min-h-[62px] items-center justify-center rounded-[22px] bg-[#1C1632] px-4 ${className}`}
       disabled={isLoading}
-      className={`w-full h-14 px-4 rounded-[15px] bg-primary items-center justify-center ${className}`}>
+      onPress={onPress}
+      style={{
+        shadowColor: '#12051D',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.2,
+        shadowRadius: 18,
+        elevation: 8,
+      }}
+    >
       {isLoading ? (
-        <ActivityIndicator color="white" />
+        <ActivityIndicator color="#FFF9FD" />
       ) : (
-        <Text className="text-white text-lg font-semibold">
-          {title}
-        </Text>
+        <Text className="text-[17px] font-semibold tracking-[0.3px] text-[#FFF9FD]">{title}</Text>
       )}
     </TouchableOpacity>
-  )
-}
+  );
+};
 
-export default PrimaryButton
-
+export default PrimaryButton;

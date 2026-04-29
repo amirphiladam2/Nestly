@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
-import { Slot, useRouter, useSegments } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import { AuthProvider, useAuth } from '@/context/auth';
-import { Stack } from "expo-router";
-import "./global.css"
+
+import './global.css';
 
 const InitialLayout = () => {
   const { session, loading } = useAuth();
@@ -10,18 +10,17 @@ const InitialLayout = () => {
   const router = useRouter();
 
   useEffect(() => {
-    if (loading) return; // Wait until we know the auth status
+    if (loading) return;
 
     const inAuthGroup = segments[0] === '(auth)';
+    const inTabsGroup = segments[0] === '(tabs)';
 
-    if (!session && !inAuthGroup) {
-      //No session + trying to access App -> Go to Login
+    if (!session && inTabsGroup) {
       router.replace('/(auth)/AuthScreen');
     } else if (session && inAuthGroup) {
-      //Has session + sitting on Login -> Go to Home
       router.replace('/(tabs)/home');
     }
-  }, [session, loading, segments]);
+  }, [loading, router, segments, session]);
 
   return <Stack screenOptions={{ headerShown: false }} />;
 };

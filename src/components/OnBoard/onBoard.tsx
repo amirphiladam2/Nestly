@@ -68,7 +68,7 @@ export default function OnBoard() {
 
   const handleDone = async () => {
     await AsyncStorage.setItem('hasCompletedOnboarding', 'true');
-    router.replace('/AuthScreen');
+    router.replace('/(auth)/AuthScreen');
   };
 
   const currentBackgroundColor = onboardingData[currentSlideIndex]?.backgroundColor || '#ffffff';
