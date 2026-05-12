@@ -1,38 +1,31 @@
-import Feather from '@expo/vector-icons/Feather';
-import React from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native'
+import React from 'react'
+import { Ionicons } from '@expo/vector-icons'; 
+import { Transactions } from '@/types/transactions'
 
-type Props = {
-  id: number;
-  amount: number;
-  category: string;
-  description?: string | null;
-  onUpdate?: (id: number) => void;
-  onDelete?: (id: number) => void;
-};
-
-export default function TransactionCard({ id, amount, category, description, onUpdate, onDelete }: Props) {
+const TransactionCard = ({ amount, category, description,onEdit,onDelete }: Transactions) => {
   return (
-    <View className="flex-row justify-between items-center p-4 mt-4 w-full h-24 border border-borderColor rounded-xl">
-      <View>
-        <Text className="font-bold">{category}</Text>
-        <Text>{description || 'No description'}</Text>
+    <View className='w-full bg-white py-4 border border-gray-300 border-l-4 border-l-red mt-2 rounded-xl px-2'>
+      <View className='flex-row justify-between'>
+        <Text className='text-xl font-semibold'>{category}</Text>
+        <Text className='text-xl font-semibold text-red'>-${amount}</Text>
       </View>
-      <View className="items-end">
-        <Text className="text-red font-bold mb-2">-${amount}</Text>
-        <View className="flex-row gap-4">
-          {onUpdate && (
-            <TouchableOpacity onPress={() => onUpdate(id)}>
-              <Feather name="edit-2" size={16} color="gray" />
-            </TouchableOpacity>
-          )}
-          {onDelete && (
-            <TouchableOpacity onPress={() => onDelete(id)}>
-              <Feather name="trash-2" size={16} color="gray" />
-            </TouchableOpacity>
-          )}
-        </View>
+
+      <Text>{description}</Text>
+
+      <View className='flex-row justify-end gap-x-4'>
+        <TouchableOpacity onPress={onEdit}>
+          <Ionicons name='create-outline' size={24} color="black" />
+        </TouchableOpacity>
+        
+        <TouchableOpacity onPress={onDelete}>
+          <Ionicons name="trash" size={24} color="red" />
+        </TouchableOpacity>
       </View>
     </View>
-  );
+  )
 }
+
+export default TransactionCard
+
+const styles = StyleSheet.create({})

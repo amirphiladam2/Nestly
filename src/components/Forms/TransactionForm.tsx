@@ -1,88 +1,100 @@
+import { TransactionInput, Transactions } from '@/types/transactions';
 import React, { useEffect, useState } from 'react';
-import { Button, TextInput, View } from 'react-native';
+import { Button, StyleSheet, Text, TextInput, View } from 'react-native';
 
-import type { Transaction, TransactionInput } from '@/types/transaction';
+export type TransactionFormProps = {
+  addExpenses: (data: TransactionInput) => void;
+  loading: boolean;
+  editingExpense: Transactions | null;
+  updateExpense: (
+    id: number,
+    updatedData: {
+      amount: number;
+      category: string;
+      description: string;
+    }
+  ) => void;
+}
+const TransactionForm = ({ addExpenses, loading, editingExpense, updateExpense }: TransactionFormProps) => {
+  const [amount, setAmount] = useState('')
+  const [category, setCategory] = useState('')
+  const [description, setDescription] = useState('')
 
-type TransactionFormProps = {
-  initialValues?: Transaction | null;
-  submitButtonText?: string;
-  onSubmit: (data: TransactionInput) => Promise<void> | void;
-  onCancel?: () => void;
-};
-
-const TransactionForm = ({ initialValues, submitButtonText = 'Add', onSubmit, onCancel }: TransactionFormProps) => {
-  const [amount, setAmount] = useState('');
-  const [category, setCategory] = useState('');
-  const [description, setDescription] = useState('');
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    if (initialValues) {
-      setAmount(initialValues.amount.toString());
-      setCategory(initialValues.category);
-      setDescription(initialValues.description || '');
-    } else {
-      resetForm();
+    if (editingExpense) {
+      setAmount(editingExpense.amount.toString());
+      setCategory(editingExpense.category);
+      setDescription(editingExpense.description || '');
     }
-  }, [initialValues]);
+  }, [editingExpense]);
 
-  const resetForm = () => {
-    setAmount('');
-    setCategory('');
-    setDescription('');
-  };
-
-  const handleSubmit = async () => {
-    const parsedAmount = Number(amount);
-
-    if (!amount || !category || Number.isNaN(parsedAmount)) {
+  const handleAddTransaction = () => {
+    if (!amount || !category) {
+      setError("All fields are required");
+      return;
+    }
+    if (isNaN(Number(amount)) || Number(amount) <= 0) {
+      setError("Please enter a valid amount");
       return;
     }
 
-    try {
-      await onSubmit({
-        amount: parsedAmount,
-        category: category.trim(),
-        description: description.trim(),
-      });
-      resetForm();
-    } catch (error) {
-      console.log('Unable to save transaction:', error);
-    }
-  };
+    setError('');
 
+    if (editingExpense) {
+
+      updateExpense(editingExpense.id, {
+        amount: Number(amount),
+        category,
+        description
+      });
+
+    } else {
+
+      addExpenses({
+        amount: Number(amount),
+        category,
+        description
+      });
+
+    }
+
+    setAmount('');
+    setCategory('');
+    setDescription('');
+  }
   return (
-    <View>
+    <View className="mb-4">
+      {error ? <Text className='text-lg text-red-500 mb-2'>{error}</Text> : null}
       <TextInput
-        placeholder="Amount"
+        className='border border-gray-300 p-3 rounded-lg mb-3'
+        placeholder='Enter the amount'
         value={amount}
         onChangeText={setAmount}
         keyboardType="numeric"
       />
-
       <TextInput
-        placeholder="Category"
+        className='border border-gray-300 p-3 rounded-lg mb-3'
+        placeholder='Enter the Category'
         value={category}
         onChangeText={setCategory}
       />
-
       <TextInput
-        placeholder="Description"
+        className='border border-gray-300 p-3 rounded-lg mb-4'
+        placeholder='Enter the description'
         value={description}
         onChangeText={setDescription}
-        className="mb-4"
       />
-      <View className="flex-row gap-4 mb-4">
-        {onCancel && (
-          <View className="flex-1">
-            <Button title="Cancel" onPress={onCancel} color="gray" />
-          </View>
-        )}
-        <View className="flex-1">
-          <Button title={submitButtonText} onPress={() => void handleSubmit()} />
-        </View>
-      </View>
+      <Button
+        disabled={loading}
+        title={loading ? "Saving..." : editingExpense ? "Update" : "Add Transaction"}
+        onPress={handleAddTransaction}
+      />
     </View>
-  );
-};
+  )
+}
 
-export default TransactionForm;
+export default TransactionForm
+
+const styles = StyleSheet.create({})

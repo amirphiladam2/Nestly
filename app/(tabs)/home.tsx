@@ -1,60 +1,57 @@
-import React, { useEffect } from 'react';
-import { FlatList, StatusBar, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { StyleSheet, Text, View,Button } from 'react-native'
+import React, { useEffect,useState } from 'react'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import Header from '@/components/HomeScreen/Header'
+import TransactionForm from '@/components/Forms/TransactionForm'
+import { useTransaction } from '@/hooks/useTransaction'
+import TransactionCard from '@/components/Cards/TransactionCard'
+import { Transactions } from '@/types/transactions'
+import { TransactionInput } from '@/types/transactions'
 
-import TransactionCard from '@/components/Cards/transactionCard';
-import TransactionForm from '@/components/Forms/TransactionForm';
-import Header from '@/components/HomeScreen/Header';
-import { Colors } from '@/constants/Colors';
-import { useTransaction } from '@/hooks/useTransaction';
-import type { TransactionInput } from '@/types/transaction';
-
-export default function Home() {
-  const { addExpense, expenses, fetchExpenses, deleteExpense, updateExpense } = useTransaction();
-  const [editingId, setEditingId] = React.useState<number | null>(null);
-
+const home = () => {
+  const[editingExpense,setEditingExpense]=useState<Transactions|null>(null);
+  const { expenses, fetchExpense,addExpense,deleteExpense,updateExpense,loading } = useTransaction();
+ 
   useEffect(() => {
-    void fetchExpenses();
-  }, [fetchExpenses]);
+    fetchExpense();
+  }, [])
 
-  const editingTransaction = expenses.find((exp) => exp.id === editingId);
+  const handleUpdateExpense = async (
+  id: number,
+  updatedData: TransactionInput
+) => {
 
-  const handleSubmit = async (data: TransactionInput) => {
-    if (editingId) {
-      await updateExpense(editingId, data);
-      setEditingId(null);
-    } else {
-      await addExpense(data);
-    }
-  };
+  await updateExpense(id, updatedData);
 
+  setEditingExpense(null);
+};
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.background }}>
-      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" translucent />
+    <SafeAreaView className='flex-1'>
       <Header />
-      <View className="flex-1 px-4">
-        <TransactionForm
-          initialValues={editingTransaction}
-          submitButtonText={editingId ? 'Update' : 'Add'}
-          onSubmit={handleSubmit}
-          onCancel={editingId ? () => setEditingId(null) : undefined}
+      <View className='px-4'>
+        <TransactionForm 
+          addExpenses={addExpense}
+          editingExpense={editingExpense}
+          updateExpense={handleUpdateExpense}
+          loading={loading}
         />
-        <FlatList
-          data={expenses}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <TransactionCard
-              id={item.id}
-              amount={item.amount}
-              category={item.category}
-              description={item.description}
-              onDelete={deleteExpense}
-              onUpdate={setEditingId}
-            />
-          )}
-        />
+        {expenses.length > 0 ? (expenses.map((item: any) =>
+        (<TransactionCard
+          key={item.id}
+          id={item.id}
+          amount={item.amount} 
+          category={item.category}
+          description={item.description}
+          onDelete={()=>deleteExpense(item.id)}
+          onEdit={()=>setEditingExpense(item)}
+        />))
+        ) :
+          (<Text>No meal found in the table</Text>)}
       </View>
     </SafeAreaView>
-  );
+  )
 }
 
+export default home
+
+const styles = StyleSheet.create({})
