@@ -1,100 +1,116 @@
-import { TransactionInput, Transactions } from '@/types/transactions';
+import { useTransaction } from '@/hooks/useTransaction';
+import { Transactions } from '@/types/transactions';
 import React, { useEffect, useState } from 'react';
-import { Button, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Button, Text, TextInput, View } from 'react-native';
 
-export type TransactionFormProps = {
-  addExpenses: (data: TransactionInput) => void;
-  loading: boolean;
-  editingExpense: Transactions | null;
-  updateExpense: (
-    id: number,
-    updatedData: {
-      amount: number;
-      category: string;
-      description: string;
-    }
-  ) => void;
+type TransactionFormProps={
+  onSuccess: () => void;
+  editingItem: Transactions | null;
+  clearEditing: () => void;
 }
-const TransactionForm = ({ addExpenses, loading, editingExpense, updateExpense }: TransactionFormProps) => {
-  const [amount, setAmount] = useState('')
-  const [category, setCategory] = useState('')
-  const [description, setDescription] = useState('')
 
-  const [error, setError] = useState('')
+const TransactionForm = ({ onSuccess, editingItem, clearEditing }: TransactionFormProps) => {
+    const[category,setCategory]=useState('')
+    const[amount,setAmount]=useState('')
+    const[description,setDescription]=useState('')
+    const[error,setError]=useState('')
+   
+    const{addExpense, updateExpense, loading}=useTransaction();
 
-  useEffect(() => {
-    if (editingExpense) {
-      setAmount(editingExpense.amount.toString());
-      setCategory(editingExpense.category);
-      setDescription(editingExpense.description || '');
-    }
-  }, [editingExpense]);
+    useEffect(()=>{
+      if(editingItem){
+        setAmount(editingItem.amount.toString());
+        setCategory(editingItem.category);
+        setDescription(editingItem.description || '');
+      }
+    },[editingItem])
+    
+    const handleAddTransaction=async()=>{
+       if(!category || !amount){
+         setError("Please provide the details");
+         return;
+       }
 
-  const handleAddTransaction = () => {
-    if (!amount || !category) {
-      setError("All fields are required");
-      return;
-    }
-    if (isNaN(Number(amount)) || Number(amount) <= 0) {
-      setError("Please enter a valid amount");
-      return;
-    }
+       if(isNaN(Number(amount)) || Number(amount)<=0){
+         setError("Please enter a valid amount");
+         return;
+       }
+       setError('')
 
-    setError('');
-
-    if (editingExpense) {
-
-      updateExpense(editingExpense.id, {
+         if (editingItem) {
+      await updateExpense(editingItem.id, {
         amount: Number(amount),
         category,
         description
       });
+      clearEditing();
 
     } else {
 
-      addExpenses({
+      await addExpense({
         amount: Number(amount),
         category,
         description
       });
 
     }
+       //Clear the fields
+       setAmount('')
+       setCategory('')
+       setDescription('')
 
-    setAmount('');
-    setCategory('');
-    setDescription('');
-  }
+       // Notify parent (Home) that we successfully added an item
+       onSuccess()
+    }
+
+    const handleCancel = () => {
+      setAmount('')
+      setCategory('')
+      setDescription('')
+      clearEditing()
+    }
+
   return (
-    <View className="mb-4">
-      {error ? <Text className='text-lg text-red-500 mb-2'>{error}</Text> : null}
+    <View className='gap-2 mb-2'>
+     {error?<Text className='text-red'>{error}</Text>:null}
       <TextInput
-        className='border border-gray-300 p-3 rounded-lg mb-3'
-        placeholder='Enter the amount'
+        className='border border-gray-400 rounded-xl'
+        placeholder='Enter the amount $'
         value={amount}
         onChangeText={setAmount}
-        keyboardType="numeric"
       />
       <TextInput
-        className='border border-gray-300 p-3 rounded-lg mb-3'
-        placeholder='Enter the Category'
+        className='border border-gray-400 rounded-xl'
+        placeholder='Enter the category'
         value={category}
         onChangeText={setCategory}
       />
       <TextInput
-        className='border border-gray-300 p-3 rounded-lg mb-4'
+        className='border border-gray-400 rounded-xl px-2 py-1'
         placeholder='Enter the description'
         value={description}
         onChangeText={setDescription}
       />
-      <Button
-        disabled={loading}
-        title={loading ? "Saving..." : editingExpense ? "Update" : "Add Transaction"}
-        onPress={handleAddTransaction}
-      />
+      <View className="flex-row justify-between w-full">
+        {editingItem && (
+          <View className="flex-1 mr-2">
+            <Button 
+              title="Cancel"
+              onPress={handleCancel}
+              color="gray"
+            />
+          </View>
+        )}
+        <View className="flex-1">
+          <Button 
+             title={loading ? (editingItem ? 'Updating...' : 'Adding...') : (editingItem ? 'Update' : 'Add Transaction')}
+             onPress={handleAddTransaction}
+             disabled={loading}
+           />
+        </View>
+      </View>
     </View>
   )
 }
-
 export default TransactionForm
 
-const styles = StyleSheet.create({})
