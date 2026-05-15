@@ -37,7 +37,7 @@ const TransactionForm = ({ onSuccess, editingItem, clearEditing }: TransactionFo
        }
        setError('')
 
-         if (editingItem) {
+      if (editingItem) {
       await updateExpense(editingItem.id, {
         amount: Number(amount),
         category,

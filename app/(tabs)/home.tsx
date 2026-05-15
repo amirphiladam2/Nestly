@@ -2,15 +2,14 @@ import TransactionCard from '@/components/Cards/TransactionCard'
 import TransactionForm from '@/components/Forms/TransactionForm'
 import Header from '@/components/HomeScreen/Header'
 import { useTransaction } from '@/hooks/useTransaction'
-import React, { useEffect } from 'react'
+import React, { useEffect ,useState} from 'react'
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-
 import { Transactions } from '@/types/transactions'
 
 const home = () => {
-  const { expenses, fetchExpense, deleteExpense,updateExpense, isFetching } = useTransaction();
-  const [editingItem, setEditingItem] = React.useState<Transactions | null>(null);
+  const { expenses, fetchExpense, deleteExpense,isFetching } = useTransaction();
+  const [editingItem, setEditingItem] = useState<Transactions | null>(null);
 
   useEffect(() => {
     fetchExpense();
@@ -51,4 +50,3 @@ const home = () => {
 
 export default home
 
-const styles = StyleSheet.create({})
